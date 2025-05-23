@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Face Recognition System</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="video">Upload Video:</label>
+        <input type="file" id="video" name="video" accept="video/*">
+        <button type="submit">Upload</button>
+    </form>
+    <h2>Video Stream</h2>
+    <img src="{{ url_for('video_feed') }}" alt="Video Stream">
+    <h2>Recognition Results</h2>
+    <div id="results"></div>
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const eventSource = new EventSource('/results');
+        eventSource.onmessage = function(event) {
+            resultsDiv.innerHTML = event.data;
+        };
+    </script>
+</body>
+</html>
