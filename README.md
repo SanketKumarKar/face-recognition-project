@@ -6,11 +6,11 @@ Developed real-time face recognition system using OpenCV and Deep Learning.
 
 1. Clone the repository:
    ```
-   git clone https://github.com/githubnext/workspace-blank.git
+   git clone https://github.com/SanketKumarKar/face-recognition-project
    ```
 2. Navigate to the project directory:
    ```
-   cd workspace-blank
+   cd face-recognition-project
    ```
 3. Install the required libraries:
    ```
