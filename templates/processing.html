@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Video - Smart Face Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <meta http-equiv="refresh" content="3;url={{ url_for('process_status') }}">
+    <style>
+        .processing-container {
+            text-align: center;
+            padding: 50px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .spinner {
+            display: inline-block;
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .spinner div {
+            transform-origin: 40px 40px;
+            animation: spinner 1.2s linear infinite;
+        }
+        
+        .spinner div:after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 3px;
+            left: 37px;
+            width: 6px;
+            height: 18px;
+            border-radius: 20%;
+            background: var(--primary-color);
+        }
+        
+        .spinner div:nth-child(1) {
+            transform: rotate(0deg);
+            animation-delay: -1.1s;
+        }
+        
+        .spinner div:nth-child(2) {
+            transform: rotate(30deg);
+            animation-delay: -1.0s;
+        }
+        
+        .spinner div:nth-child(3) {
+            transform: rotate(60deg);
+            animation-delay: -0.9s;
+        }
+        
+        .spinner div:nth-child(4) {
+            transform: rotate(90deg);
+            animation-delay: -0.8s;
+        }
+        
+        .spinner div:nth-child(5) {
+            transform: rotate(120deg);
+            animation-delay: -0.7s;
+        }
+        
+        .spinner div:nth-child(6) {
+            transform: rotate(150deg);
+            animation-delay: -0.6s;
+        }
+        
+        .spinner div:nth-child(7) {
+            transform: rotate(180deg);
+            animation-delay: -0.5s;
+        }
+        
+        .spinner div:nth-child(8) {
+            transform: rotate(210deg);
+            animation-delay: -0.4s;
+        }
+        
+        .spinner div:nth-child(9) {
+            transform: rotate(240deg);
+            animation-delay: -0.3s;
+        }
+        
+        .spinner div:nth-child(10) {
+            transform: rotate(270deg);
+            animation-delay: -0.2s;
+        }
+        
+        .spinner div:nth-child(11) {
+            transform: rotate(300deg);
+            animation-delay: -0.1s;
+        }
+        
+        .spinner div:nth-child(12) {
+            transform: rotate(330deg);
+            animation-delay: 0s;
+        }
+        
+        @keyframes spinner {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            max-width: 600px;
+            margin: 40px auto;
+            position: relative;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+        
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--light-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--gray-color);
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .step-icon.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+        }
+        
+        .step-label.active {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .progress-line {
+            position: absolute;
+            top: 25px;
+            left: 75px;
+            right: 75px;
+            height: 3px;
+            background-color: var(--light-color);
+            z-index: 0;
+        }
+        
+        .progress-line-inner {
+            height: 100%;
+            width: 33%;
+            background-color: var(--primary-color);
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-camera-retro"></i>
+            <h1>Smart Face Recognition</h1>
+        </div>
+        <p class="tagline">Fast, Accurate, Secure</p>
+    </header>
+
+    <main>
+        <div class="processing-container">
+            <div class="spinner">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            
+            <h2>Processing Your Video</h2>
+            <p>Please wait while we analyze the faces in your video. This may take a few minutes depending on the video length.</p>
+            
+            <div class="progress-steps">
+                <div class="progress-line">
+                    <div class="progress-line-inner" id="progress-bar"></div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-icon active">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <div class="step-label active">Upload</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-icon" id="step2-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="step-label" id="step2-label">Processing</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-icon" id="step3-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="step-label" id="step3-label">Complete</div>
+                </div>
+            </div>
+            
+            <p>The page will automatically refresh to show the results once processing is complete.</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Smart Face Recognition System</p>
+    </footer>
+
+    <script>
+        // Simulate progress
+        let progress = 0;
+        const progressBar = document.getElementById('progress-bar');
+        const step2Icon = document.getElementById('step2-icon');
+        const step2Label = document.getElementById('step2-label');
+        const step3Icon = document.getElementById('step3-icon');
+        const step3Label = document.getElementById('step3-label');
+        
+        setTimeout(() => {
+            step2Icon.classList.add('active');
+            step2Label.classList.add('active');
+            
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = Math.min(progress, 66) + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    step3Icon.classList.add('active');
+                    step3Label.classList.add('active');
+                }
+            }, 500);
+        }, 1000);
+    </script>
+</body>
+</html>

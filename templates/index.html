@@ -3,26 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Recognition</title>
+    <title>Smart Face Recognition</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <h1>Face Recognition System</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <label for="video">Upload Video:</label>
-        <input type="file" id="video" name="video" accept="video/*">
-        <button type="submit">Upload</button>
-    </form>
-    <h2>Video Stream</h2>
-    <img src="{{ url_for('video_feed') }}" alt="Video Stream">
-    <h2>Recognition Results</h2>
-    <div id="results"></div>
+    <header>
+        <div class="logo">
+            <i class="fas fa-camera-retro"></i>
+            <h1>Smart Face Recognition</h1>
+        </div>
+        <p class="tagline">Fast, Accurate, Secure</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="panel video-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-video"></i> Live Camera Feed</h2>
+                    <div class="status-indicator" id="camera-status">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">Active</span>
+                    </div>
+                </div>
+                <div class="video-container">
+                    <img src="{{ url_for('video_feed') }}" alt="Video Stream" id="video-stream">
+                    <div class="overlay-controls">
+                        <button id="fullscreen-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        <button id="snapshot-btn" title="Take Snapshot"><i class="fas fa-camera"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel results-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-user-check"></i> Recognition Results</h2>
+                    <div class="status-indicator" id="model-status">
+                        <span class="status-dot {{ 'online' if model_loaded else 'offline' }}"></span>
+                        <span class="status-text">{{ 'Model Loaded' if model_loaded else 'Model Offline' }}</span>
+                    </div>
+                </div>
+                <div class="results-container">
+                    <div id="results-list">
+                        <div class="placeholder-message">
+                            <i class="fas fa-user-slash"></i>
+                            <p>No faces detected yet</p>
+                        </div>
+                    </div>
+                    <div class="statistics">
+                        <div class="stat-box">
+                            <span class="stat-value" id="face-count">0</span>
+                            <span class="stat-label">Faces Detected</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="confidence-avg">0%</span>
+                            <span class="stat-label">Avg. Confidence</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel upload-panel">
+            <div class="panel-header">
+                <h2><i class="fas fa-upload"></i> Upload Video</h2>
+            </div>
+            <form action="/upload" method="post" enctype="multipart/form-data" id="upload-form">
+                <div class="file-input-container">
+                    <input type="file" id="video" name="video" accept="video/*" class="file-input">
+                    <label for="video" class="file-label">
+                        <i class="fas fa-file-video"></i>
+                        <span class="file-label-text">Choose a video file</span>
+                    </label>
+                    <span class="file-name" id="file-name">No file chosen</span>
+                </div>
+                <button type="submit" class="upload-btn">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload and Analyze
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Smart Face Recognition System</p>
+        <div class="footer-links">
+            <a href="#" title="Settings"><i class="fas fa-cog"></i></a>
+            <a href="#" title="Help"><i class="fas fa-question-circle"></i></a>
+            <a href="#" title="Information"><i class="fas fa-info-circle"></i></a>
+        </div>
+    </footer>
+
+    <div id="fullscreen-container" class="hidden">
+        <div class="fullscreen-header">
+            <h3>Live Recognition</h3>
+            <button id="close-fullscreen"><i class="fas fa-times"></i></button>
+        </div>
+        <img src="" alt="Fullscreen Video" id="fullscreen-video">
+    </div>
+
     <script>
-        const resultsDiv = document.getElementById('results');
+        // File input display
+        document.getElementById('video').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file chosen';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Fullscreen functionality
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        const closeFullscreenBtn = document.getElementById('close-fullscreen');
+        const fullscreenVideo = document.getElementById('fullscreen-video');
+        const videoStream = document.getElementById('video-stream');
+
+        fullscreenBtn.addEventListener('click', function() {
+            fullscreenVideo.src = videoStream.src;
+            fullscreenContainer.classList.remove('hidden');
+            document.body.classList.add('no-scroll');
+        });
+
+        closeFullscreenBtn.addEventListener('click', function() {
+            fullscreenContainer.classList.add('hidden');
+            document.body.classList.remove('no-scroll');
+        });
+
+        // Take snapshot functionality
+        document.getElementById('snapshot-btn').addEventListener('click', function() {
+            // This would typically save the current frame or add additional functionality
+            alert('Snapshot taken!');
+        });
+
+        // Results handling with Server-Sent Events
+        const resultsList = document.getElementById('results-list');
+        const faceCount = document.getElementById('face-count');
+        const confidenceAvg = document.getElementById('confidence-avg');
         const eventSource = new EventSource('/results');
+
         eventSource.onmessage = function(event) {
-            resultsDiv.innerHTML = event.data;
+            try {
+                const results = JSON.parse(event.data);
+                
+                if (results.length > 0) {
+                    // Clear placeholder
+                    resultsList.innerHTML = '';
+                    
+                    // Update face count
+                    faceCount.textContent = results.length;
+                    
+                    // Calculate average confidence
+                    const totalConfidence = results.reduce((sum, result) => sum + result.confidence, 0);
+                    const avgConfidence = (totalConfidence / results.length * 100).toFixed(1);
+                    confidenceAvg.textContent = avgConfidence + '%';
+                    
+                    // Add result items
+                    results.forEach(result => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'result-item';
+                        
+                        const confidenceClass = result.confidence > 0.8 ? 'high' : 
+                                              result.confidence > 0.7 ? 'medium' : 'low';
+                        
+                        resultItem.innerHTML = `
+                            <div class="result-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="result-info">
+                                <div class="result-name">${result.name}</div>
+                                <div class="result-time">${result.time}</div>
+                            </div>
+                            <div class="result-confidence ${confidenceClass}">
+                                ${Math.round(result.confidence * 100)}%
+                            </div>
+                        `;
+                        
+                        resultsList.appendChild(resultItem);
+                    });
+                } else {
+                    // Show placeholder if no results
+                    resultsList.innerHTML = `
+                        <div class="placeholder-message">
+                            <i class="fas fa-user-slash"></i>
+                            <p>No faces detected</p>
+                        </div>
+                    `;
+                    faceCount.textContent = '0';
+                    confidenceAvg.textContent = '0%';
+                }
+            } catch (error) {
+                console.error('Error parsing results:', error);
+            }
         };
+
+        // Check if camera is active
+        const videoElement = document.getElementById('video-stream');
+        const cameraStatus = document.getElementById('camera-status');
+        
+        videoElement.addEventListener('error', function() {
+            cameraStatus.innerHTML = '<span class="status-dot offline"></span><span class="status-text">Offline</span>';
+        });
     </script>
 </body>
 </html>
