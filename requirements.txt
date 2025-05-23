@@ -17,5 +17,4 @@ matplotlib>=3.5.0
 
 # Alternative for newer Python versions where TensorFlow isn't available
 # Install one of these if TensorFlow installation fails:
-# torch
-# onnxruntime
+torch
