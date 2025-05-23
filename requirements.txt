@@ -1,10 +1,21 @@
-tensorflow>=2.8.0
-opencv-python>=4.5.5
-Flask>=2.0.0
+# Core ML requirements
+tensorflow-cpu>=2.8.0; python_version < '3.12'
+# For Python 3.12+ consider using a compatible alternative like PyTorch or TensorFlow Lite
 numpy>=1.22.0
-dlib>=19.22.0
+scipy>=1.8.0
+scikit-learn>=1.0.2
+
+# Computer Vision
+opencv-python>=4.5.5
+dlib>=19.22.0; python_version < '3.12'
 imutils>=0.5.4
 Pillow>=9.0.0
+
+# Web Framework
+Flask>=2.0.0
 matplotlib>=3.5.0
-scikit-learn>=1.0.2
-scipy>=1.8.0
+
+# Alternative for newer Python versions where TensorFlow isn't available
+# Install one of these if TensorFlow installation fails:
+# torch
+# onnxruntime

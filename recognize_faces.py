@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import tensorflow as tf
+import torch  # Using PyTorch instead of TensorFlow
 import os
 import time
 import dlib
@@ -9,11 +9,12 @@ from imutils import face_utils
 class FaceRecognizer:
     def __init__(self):
         # Load the trained model if it exists
-        self.model_path = 'face_recognition_model.h5'
+        self.model_path = 'face_recognition_model.pt'  # Changed extension to .pt for PyTorch models
         self.model_loaded = False
         
         if os.path.exists(self.model_path):
-            self.model = tf.keras.models.load_model(self.model_path)
+            self.model = torch.load(self.model_path)
+            self.model.eval()  # Set model to evaluation mode
             self.model_loaded = True
             print("Model loaded successfully")
         else:
@@ -84,7 +85,9 @@ class FaceRecognizer:
         try:
             face_resized = cv2.resize(face, (224, 224))
             face_normalized = face_resized / 255.0
-            return face_normalized
+            # Convert to PyTorch tensor and adjust channels order if needed
+            face_tensor = torch.from_numpy(face_normalized.transpose(2, 0, 1)).float()  # Convert to CxHxW format
+            return face_tensor
         except Exception as e:
             print(f"Error preprocessing face: {e}")
             return None
@@ -106,12 +109,18 @@ class FaceRecognizer:
                 return None, 0.0
                 
             # Add batch dimension
-            face_batch = np.expand_dims(preprocessed_face, axis=0)
+            face_batch = preprocessed_face.unsqueeze(0)  # Add batch dimension
             
             # Get model prediction
-            predictions = self.model.predict(face_batch, verbose=0)
-            class_id = np.argmax(predictions[0])
-            confidence = float(predictions[0][class_id])
+            with torch.no_grad():  # Disable gradient computation for inference
+                predictions = self.model(face_batch)
+                
+            # Get class with highest probability
+            _, predicted_class = torch.max(predictions, 1)
+            class_id = predicted_class.item()
+            
+            # Get confidence score
+            confidence = torch.nn.functional.softmax(predictions, dim=1)[0][class_id].item()
             
             name = self.face_names[class_id] if class_id < len(self.face_names) else "Unknown"
             

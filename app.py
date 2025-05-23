@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, Response, jsonify, flash, session
 import cv2
-import tensorflow as tf
+import torch  # Using PyTorch instead of TensorFlow
 import numpy as np
 import dlib
 import time
