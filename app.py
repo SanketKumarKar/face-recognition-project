@@ -32,7 +32,7 @@ processing_queue = queue.Queue()
 
 @app.route('/')
 def index():
-    return render_template('index.html', model_loaded=recognizer.model_loaded)
+    return render_template('index.html', model_loaded=recognizer.model_loaded, time=time)
 
 def generate_frames():
     cap = cv2.VideoCapture(0)
