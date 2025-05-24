@@ -1,6 +1,9 @@
 # Face Recognition Project
 
 A real-time face recognition system built with Flask, OpenCV, and PyTorch, capable of detecting and recognizing faces in images and video streams.
+The Above is Python Based project. To test live demo of FACE RECOGNITION visit client side based project.
+Link for live demo:- https://cyberface-scan.netlify.app/
+Link of GitHub Repository:- https://github.com/SanketKumarKar/cyberpunk-face-recognition
 
 ## Features
 
