@@ -53,24 +53,35 @@ pip install -r requirements.txt
 
 ##### Windows:
 - If you encounter issues with dlib installation, install CMake first:
-  ```bash
+  ```cmd
   pip install cmake
   pip install dlib
   ```
-- Make sure Visual C++ build tools are installed
+- Make sure Visual C++ build tools are installed ([Download here](https://visualstudio.microsoft.com/visual-cpp-build-tools/))
 
 ##### macOS:
 - You might need to install XCode Command Line Tools:
   ```bash
   xcode-select --install
   ```
+- If you encounter dlib installation errors, try:
+  ```bash
+  pip install cmake
+  pip install dlib
+  ```
 
 ##### Linux:
 - Install the following packages before installing requirements:
   ```bash
   sudo apt-get update
-  sudo apt-get install -y cmake build-essential libopenblas-dev
+  sudo apt-get install -y build-essential cmake libopenblas-dev liblapack-dev libx11-dev libgtk-3-dev python3-dev
   ```
+- If you encounter dlib installation errors, try:
+  ```bash
+  pip install cmake
+  pip install dlib
+  ```
+- dlib may not support Python 3.12+ yet. Use Python 3.8–3.11 for best compatibility.
 
 ### Step 4: Download the Face Recognition Model (Optional)
 
@@ -79,6 +90,68 @@ The application will work without a pre-trained model, but will only detect face
 To include face recognition:
 1. Place your trained model file in the project root directory
 2. For PyTorch models, name it `face_recognition_model.pt`
+
+## Quick Start (Linux, Windows, macOS)
+
+### Linux
+1. Install system dependencies:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y build-essential cmake libopenblas-dev liblapack-dev libx11-dev libgtk-3-dev python3-dev
+   ```
+2. (Recommended) Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+3. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the app:
+   ```bash
+   python app.py
+   ```
+
+### Windows
+1. Install [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+2. (Recommended) Create and activate a virtual environment:
+   ```cmd
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+3. Install CMake and dlib if you have issues:
+   ```cmd
+   pip install cmake
+   pip install dlib
+   ```
+4. Install Python dependencies:
+   ```cmd
+   pip install -r requirements.txt
+   ```
+5. Run the app:
+   ```cmd
+   python app.py
+   ```
+
+### macOS
+1. Install Xcode Command Line Tools:
+   ```bash
+   xcode-select --install
+   ```
+2. (Recommended) Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+3. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the app:
+   ```bash
+   python app.py
+   ```
 
 ## Usage Instructions
 
@@ -132,8 +205,15 @@ python train_model.py --data_dir path/to/face/images
 - Check console logs for specific error messages
 
 ### Installation Problems
-- For dlib issues, make sure you have the proper build tools installed
+- For dlib issues, make sure you have the proper build tools installed (see above OS-specific instructions)
+- If you see `ModuleNotFoundError: No module named 'dlib'`, ensure dlib installed successfully:
+  ```bash
+  pip install dlib
+  ```
+- If installation fails, check your Python version (dlib may not support Python 3.12+)
 - Use `pip install -v` for verbose output to identify specific errors
+- For Windows, ensure Visual C++ build tools are installed
+- For macOS, ensure Xcode Command Line Tools are installed
 
 ## Contributing
 
